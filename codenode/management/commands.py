@@ -1,8 +1,8 @@
-######################################################################### 
-# Copyright (C) 2007, 2008, 2009 
+#########################################################################
+# Copyright (C) 2007, 2008, 2009
 # Alex Clemesha <alex@clemesha.org> & Dorian Raymer <deldotdr@gmail.com>
-# 
-# This module is part of codenode, and is distributed under the terms 
+#
+# This module is part of codenode, and is distributed under the terms
 # of the BSD License:  http://www.opensource.org/licenses/bsd-license.php
 #########################################################################
 
@@ -21,13 +21,13 @@ def init_command(name=None, test=False):
     Creates a new directory that will contain all needed
     sub-directories, config files, and other data to run
     an instance of codenode.
-    
+
     Use the test flag to create a development environment
     where the code is symlinked.
-    
+
     EXAMPLES:
         codenode-admin init -name mycodenode
-        
+
         codenode-admin init -name mycodenode -test
     """
     osjoin = os.path.join
@@ -35,17 +35,15 @@ def init_command(name=None, test=False):
     envroot = osjoin(abspath, name)
     pkgroot = os.sep.join(codenode.__file__.split(os.sep)[:-1])
     os.mkdir(envroot)
-    
+
     copytree = shutil.copytree
-    
+
     if test:
-        try: 
+        try:
             copytree = os.symlink
         except AttributeError:
-            pass   
-    
-    
-    
+            pass
+
     for dir in ["frontend", "backend"]:
         os.makedirs(osjoin(envroot, dir))
         open(osjoin(osjoin(envroot, dir), "__init__.py"), "w").close()
@@ -58,7 +56,7 @@ def init_command(name=None, test=False):
         copytree(pkgdirroot, osjoin(envroot, dirroot))
 
     pkgdataroot = osjoin(pkgroot, "data")
-    copytree(pkgdataroot, osjoin(envroot, "data"))
+    shutil.copytree(pkgdataroot, osjoin(envroot, "data"))
 
     pkgtwistedroot = osjoin(pkgroot, "twisted")
     copytree(pkgtwistedroot, osjoin(envroot, "twisted"))
@@ -66,7 +64,7 @@ def init_command(name=None, test=False):
 
 def run_command(daemonize=False): #, frontendpid=None):
     """
-    Run local desktop version of Codenode.  
+    Run local desktop version of Codenode.
     Use inside a directory created with "codenode-admin init".
 
     """
@@ -126,7 +124,7 @@ def syncdb_command():
 
 def help_command(**options):
     """
-    Prints out help for the commands. 
+    Prints out help for the commands.
 
     codenode-admin help
 
