@@ -1,8 +1,8 @@
-######################################################################### 
-# Copyright (C) 2007, 2008, 2009 
+#########################################################################
+# Copyright (C) 2007, 2008, 2009
 # Alex Clemesha <alex@clemesha.org> & Dorian Raymer <deldotdr@gmail.com>
-# 
-# This module is part of codenode, and is distributed under the terms 
+#
+# This module is part of codenode, and is distributed under the terms
 # of the BSD License:  http://www.opensource.org/licenses/bsd-license.php
 #########################################################################
 
@@ -14,7 +14,8 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns("",
-    (r'^$', 'django.views.generic.simple.redirect_to', {'url':'bookshelf'}), #uses template/homepage.html 
+    (r'^$', 'django.views.generic.simple.redirect_to', {'url':'bookshelf'}), #uses template/homepage.html
+    (r'^femhub/', include('codenode.frontend.femhub.urls')),
     (r'^bookshelf/', include('codenode.frontend.bookshelf.urls')),
     (r'^notebook/', include('codenode.frontend.notebook.urls')),
     (r'^backend/', include('codenode.frontend.backend.urls')),
@@ -30,3 +31,4 @@ if settings.DEBUG:
     urlpatterns += patterns('',
         (r'^static/(.*)', 'django.views.static.serve', {'document_root': os.path.join(settings.PROJECT_PATH, 'static')}),
 )
+
