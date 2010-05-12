@@ -1,8 +1,8 @@
-######################################################################### 
-# Copyright (C) 2007, 2008, 2009 
+#########################################################################
+# Copyright (C) 2007, 2008, 2009
 # Alex Clemesha <alex@clemesha.org> & Dorian Raymer <deldotdr@gmail.com>
-# 
-# This module is part of codenode, and is distributed under the terms 
+#
+# This module is part of codenode, and is distributed under the terms
 # of the BSD License:  http://www.opensource.org/licenses/bsd-license.php
 #########################################################################
 from django.conf import settings
@@ -23,7 +23,7 @@ def bookshelf(request, template_name='bookshelf/bookshelf.html'):
     """
     #engine_types = backend_models.EngineType.objects.values_list("name", flat=True)
     engine_types = backend_models.EngineType.objects.all()
-    return render_to_response(template_name, 
+    return render_to_response(template_name,
         {'engine_types':engine_types, 'path':request.path}, context_instance=RequestContext(request))
 
 @login_required
@@ -32,18 +32,30 @@ def load_bookshelf_data(request):
 
     Handles the current location (all, trash, archive, folder id) as well
     and the order (asc or desc) and field that it is to be sorted on.
-    """ 
+    """
     location, order, sort = [request.GET.get(v, '') for v in ['location', 'order', 'sort']]
     if order == "lastmodified":
         order = "created_time" #XXX
     if sort == "desc":
         order = "-"+order
     q = notebook_models.Notebook.objects.filter(owner=request.user, location=location).order_by(order)
-    data = [[e.guid, 
-            e.title, 
-            e.backend.all()[0].engine_type.name, 
-            e.last_modified_time().strftime("%Y-%m-%d %H:%M:%S"), 
-            e.location] for e in q]
+    #print "XXX: " + len(q)
+    data = []
+
+    for e in q:
+        #import pdb
+        #pdb.set_trace()
+        try:
+            item = [e.guid,
+                    e.title,
+                    e.backend.all()[0].engine_type.name,
+                    e.last_modified_time().strftime("%Y-%m-%d %H:%M:%S"),
+                    e.location]
+            data.append(item)
+        except:
+            #print "XXX: Invalid notebook (removing)"
+            e.delete()
+
     jsobj = json.dumps(data)
     return HttpResponse(jsobj, mimetype='application/json')
 
@@ -104,7 +116,7 @@ def new_notebook(request):
     engine_type = backend_models.EngineType.objects.get(id=engine_type_id)
     access_id = rpc.allocateEngine(engine_type.backend.address, engine_type.name)
     default_engine = backend_models.NotebookBackendRecord(notebook=nb,
-                                                engine_type=engine_type, 
+                                                engine_type=engine_type,
                                                 access_id=access_id)
     default_engine.save()
     redirect = "/notebook/%s" % nb.guid
@@ -114,7 +126,7 @@ def new_notebook(request):
 @login_required
 def empty_trash(request):
     """Permanently delete all Notebooks in the Trash section of the Bookshelf.
-    """ 
+    """
     nbids = request.POST.getlist("nbids")
     for nbid in nbids:
         nb = notebook_models.Notebook.objects.get(owner=request.user, guid=nbid)
