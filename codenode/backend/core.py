@@ -1,11 +1,12 @@
-######################################################################### 
-# Copyright (C) 2007, 2008, 2009 
+#########################################################################
+# Copyright (C) 2007, 2008, 2009
 # Alex Clemesha <alex@clemesha.org> & Dorian Raymer <deldotdr@gmail.com>
-# 
-# This module is part of codenode, and is distributed under the terms 
+#
+# This module is part of codenode, and is distributed under the terms
 # of the BSD License:  http://www.opensource.org/licenses/bsd-license.php
 #########################################################################
 
+import re
 import sys
 import time
 import uuid
@@ -43,26 +44,27 @@ class InvalidAccessId(BackendError):
 
 class EngineProcessProtocol(protocol.ProcessProtocol):
 
+    _re_port = re.compile(r"^.*port:(\d+)$", re.DOTALL)
+
     def __init__(self):
         self.deferred = defer.Deferred()
 
     def connectionMade(self):
-        """This call means the process has started, but not the
-        interpreter, yet.
-        """
+        """This call means the process has started, but not the interpreter, yet. """
 
     def outReceived(self, data):
-        """Simple protocol for the interpreter to notify us when it is
-        really running.
-        """
-        if data[0:4] == "port":
-            port = data.split(':')[1]
+        """Simple protocol for the interpreter to notify us when it is really running. """
+        result = self._re_port.match(data)
+
+        if result is not None:
+            port = result.groups()[0]
             self.deferred.callback(port)
-    
+        else:
+            log.err("got invalid data in outReceived(): %s" % data)
+
     def errReceived(self, data):
-        """
-        """
-        log.msg("Engine error", data)
+        """ """
+        log.msg("Engine info/warning/error: ", data)
 
     def interrupt(self):
         self.transport.signalProcess(SIGINT)
@@ -260,12 +262,12 @@ class Backend(service.Service):
 
 class EngineBus(object):
     """
-    Common entry point for all engine requests. 
+    Common entry point for all engine requests.
     Look up engine client by access_id.
 
     This is responsible for routing the engine message
     from the browser/frontend to the engine by access_id.
-    This does not need to process the message (un-serialize, inspect, 
+    This does not need to process the message (un-serialize, inspect,
     or otherwise).
     """
 
