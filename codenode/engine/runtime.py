@@ -1,17 +1,25 @@
-import os
+
+from codenode.engine.introspection import introspect
 
 def build_namespace():
-    from codenode.engine.introspection import introspect
     try:
         import matplotlib
         matplotlib.use('Agg')
+
+        # XXX: must be in this order because of matplotlib.use()
         from codenode.external.mmaplotlib import codenode_plot
-        from pylab import *
-        USERNAMESPACE = locals()
-        USERNAMESPACE.update({"show":codenode_plot.show, "introspect":introspect})
+        import pylab
+
+        namespace = dict(pylab.__dict__)
+
+        namespace.update({
+            'show': codenode_plot.show,
+            'introspect': introspect,
+        })
     except ImportError:
-        USERNAMESPACE={"introspect":introspect}
-    return USERNAMESPACE
+        namespace = {'introspect': introspect}
+
+    return namespace
 
 def find_port():
     import socket
