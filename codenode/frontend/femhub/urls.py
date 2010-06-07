@@ -1,6 +1,7 @@
 
-from jsonrpc import jsonrpc_site
 from django.conf.urls.defaults import *
+
+from codenode.external.jsonrpc import jsonrpc_site
 from codenode.frontend.femhub.views import femhub
 
 urlpatterns = patterns('',

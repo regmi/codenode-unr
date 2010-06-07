@@ -2,7 +2,7 @@
 from django.shortcuts import render_to_response
 from django.contrib.auth.decorators import login_required
 
-from jsonrpc import jsonrpc_method
+from codenode.external.jsonrpc import jsonrpc_method
 
 import codenode.frontend.bookshelf.models as _bookshelf
 import codenode.frontend.notebook.models as _notebook
