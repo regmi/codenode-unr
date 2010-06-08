@@ -1,0 +1,8 @@
+#!/bin/bash
+
+BASE=$1
+
+ln -sf $BASE/js/femhub codenode/frontend/static/js/femhub
+ln -sf $BASE/css/femhub codenode/frontend/static/css/femhub
+ln -sf $BASE/external/ext codenode/frontend/static/external/ext
+
