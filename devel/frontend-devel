@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+ENV=$1
+
 export PYTHONPATH=$PWD/..
-cd env
+cd $ENV
 twistd -n --pidfile=./frontend.pid codenode-frontend --env_path=$PWD --devel_mode
+

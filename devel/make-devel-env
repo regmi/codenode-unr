@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
+ENV=$1
+
 export PYTHONPATH=$PWD/..
-../bin/codenode-admin init -name env -test
-rm env/data/codenode.db
-cd env
+../bin/codenode-admin init -name $ENV -test
+rm $ENV/data/codenode.db
+cd $ENV
 django-admin.py syncdb --pythonpath=$PWD --settings="frontend.settings"
 
