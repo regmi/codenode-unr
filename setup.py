@@ -1,10 +1,10 @@
 import os
 try:
-    from setuptools import setup 
+    from setuptools import setup
 except ImportError:
     from distutils.core import setup
 
-# The below is taken from django. Compile the list of packages available, 
+# The below is taken from django. Compile the list of packages available,
 # because distutils doesn't have  an easy way to do this.
 def fullsplit(path, result=None):
     """
@@ -48,7 +48,6 @@ package_data = {'codenode':[
     'frontend/static/admin/js/admin/*.js',
     'frontend/templates/*.html',
     'frontend/templates/admin/*.html',
-    'frontend/templates/compress/*.html',
     'frontend/templates/bookshelf/*.html',
     'frontend/templates/notebook/*.html',
     'frontend/templates/notebook/*.css',
@@ -62,8 +61,8 @@ setup(
     version='0.2',
     url='http://codenode.org',
     download_url='http://pypi.python.org/pypi/codenode',
-    install_requires=['Twisted>=9.0.0', 'Django>=1.1.1', 'Whoosh>=0.3.9', 
-        'Sphinx', 'simplejson', 'nose', 'django-nose', 'django-compress'],
+    install_requires=['Twisted>=9.0.0', 'Django>=1.1.1', 'Whoosh>=0.3.9',
+        'Sphinx', 'simplejson', 'nose', 'django-nose'],
     packages=packages,
     package_data=package_data,
     scripts=["codenode/scripts/codenode-admin"],
@@ -74,3 +73,4 @@ setup(
     classifiers = ['Development Status :: 3 - Alpha'],
     setup_requires=['nose>=0.11']
 )
+
