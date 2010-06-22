@@ -104,11 +104,7 @@ INSTALLED_APPS = (
     'codenode.frontend.notebook',
     'codenode.frontend.backend',
     'codenode.frontend.usersettings',
-    'django_nose',
 )
-
-TEST_RUNNER = 'django_nose.run_tests'
-
 
 #########################################################
 # This is run every time something imports settings...FIX

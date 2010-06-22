@@ -62,7 +62,7 @@ setup(
     url='http://codenode.org',
     download_url='http://pypi.python.org/pypi/codenode',
     install_requires=['Twisted>=9.0.0', 'Django>=1.1.1', 'Whoosh>=0.3.9',
-        'Sphinx', 'simplejson', 'nose', 'django-nose'],
+        'Sphinx', 'simplejson'],
     packages=packages,
     package_data=package_data,
     scripts=["codenode/scripts/codenode-admin"],
@@ -71,6 +71,6 @@ setup(
     author_email='codenode-devel@googlegroups.com',
     license='BSD',
     classifiers = ['Development Status :: 3 - Alpha'],
-    setup_requires=['nose>=0.11']
+    setup_requires=[]
 )
 
