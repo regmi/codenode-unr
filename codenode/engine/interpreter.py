@@ -1,18 +1,18 @@
-######################################################################### 
-# Copyright (C) 2007, 2008, 2009 
+#########################################################################
+# Copyright (C) 2007, 2008, 2009
 # Alex Clemesha <alex@clemesha.org> & Dorian Raymer <deldotdr@gmail.com>
-# 
-# This module is part of codenode, and is distributed under the terms 
+#
+# This module is part of codenode, and is distributed under the terms
 # of the BSD License:  http://www.opensource.org/licenses/bsd-license.php
 #########################################################################
 
 """
-Use a python interpreter in an Object Oriented way. 
+Use a python interpreter in an Object Oriented way.
 
 Eventually, this will be general enough to be used for both pure python and
 sage.
 Things like the completer, introspection, and preparsing need to be
-abstracted out completly 
+abstracted out completly
 
 """
 
@@ -51,16 +51,16 @@ class Interpreter(InteractiveInterpreter):
         self.interrupted = False
 
     def _result_dict(self, out, in_string='', err='', in_count='', cmd_count=''):
-        return {'input_count':in_count, 
-                    'cmd_count':cmd_count, 
-                    'in':in_string, 
-                    'out':out, 
+        return {'input_count':in_count,
+                    'cmd_count':cmd_count,
+                    'in':in_string,
+                    'out':out,
                     'err':err}
 
 
     #------------------------------------------------
     # Main methods to call external
-    # 
+    #
     def cancel_interrupt(self):
         self.interrupted = False
         return self._result_dict('ok')
@@ -73,10 +73,10 @@ class Interpreter(InteractiveInterpreter):
         out_values = self.output_trap.get_values()
         self.output_trap.reset()
         self.input_count += 1
-        result = {'input_count':self.input_count, 
-                    'cmd_count':command_count, 
-                    'in':input_string, 
-                    'out':out_values[0], 
+        result = {'input_count':self.input_count,
+                    'cmd_count':command_count,
+                    'in':input_string,
+                    'out':out_values[0],
                     'err':out_values[1]}
         return result
 
@@ -116,7 +116,7 @@ class Interpreter(InteractiveInterpreter):
         return matches
 
 
-    # 
+    #
     #-----------------------------------------------
 
     def _runcommands(self, input_string):
@@ -164,6 +164,37 @@ class Interpreter(InteractiveInterpreter):
             more = self.runsource(torun)
         return command_count
 
+    def runsource(self, source):
+        """Compile source code
+
+           We allow only ``single`` and ``exec`` modes and the function tries
+           to figure out, based on compilation results, which mode should be
+           used. This is important, because we would like to take advantage
+           of simple statements (or expressions) whenever possible, but to be
+           also allowed to work with complex sets of statements. Besides this,
+           the new implementation is almost identical to the original one.
+
+        """
+        filename = '<femhub-online-lab>'
+
+        try:
+            code = self.compile(source, filename, 'single')
+        except (OverflowError, SyntaxError, ValueError):
+            try:
+                code = self.compile(source, filename, 'exec')
+            except (OverflowError, SyntaxError, ValueError):
+                # Case 1
+                self.showsyntaxerror(filename)
+                return False
+
+        if code is None:
+            # Case 2
+            return True
+
+        # Case 3
+        self.runcode(code)
+        return False
+
     def runcode(self, code):
         """Execute a code object.
 
@@ -186,7 +217,7 @@ class Interpreter(InteractiveInterpreter):
             self.showtraceback()
         else:
             if softspace(sys.stdout, 0):
-                print 
+                print
 
     def _pre_execute_filter(self, input_string):
         """Very simple at this point in devel.
@@ -195,8 +226,4 @@ class Interpreter(InteractiveInterpreter):
             return 'introspect(%s, format="print")'%input_string[:-1]
         else:
             return input_string
-
-
-
-
 
