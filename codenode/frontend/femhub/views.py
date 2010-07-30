@@ -1,6 +1,6 @@
 
 from django.shortcuts import render_to_response
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login
 
 from codenode.external.jsonrpc import jsonrpc_method
 
@@ -14,7 +14,6 @@ def jsonrpc_auth_method(method, safe=False, validate=False):
     """Convenience function for authenticated Json RPC requests. """
     return jsonrpc_method(method, authenticated=True, safe=safe, validate=validate)
 
-@login_required
 def femhub(request):
     return render_to_response('femhub/femhub.html')
 
@@ -48,4 +47,23 @@ def rpc_newNotebook(request, engine_id):
     backend.save()
 
     return { 'id': notebook.guid }
+
+@jsonrpc_method('RPC.Account.isAuthenticated')
+def rpc_Account_isAuthenticated(request):
+    """ """
+    return { 'auth': request.user.is_authenticated() }
+
+@jsonrpc_method('RPC.Account.login')
+def rpc_Account_login(request, username, password):
+    """ """
+    user = authenticate(username=username, password=password)
+
+    if user is not None:
+        if user.is_active:
+            login(request, user)
+            return { 'ok': True }
+        else:
+            return { 'ok': False, 'reason': 'disabled' }
+    else:
+        return { 'ok': False, 'reason': 'failed' }
 
