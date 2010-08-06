@@ -1,6 +1,6 @@
 
 from django.shortcuts import render_to_response
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 
 from codenode.external.jsonrpc import jsonrpc_method
 
@@ -66,4 +66,9 @@ def rpc_Account_login(request, username, password):
             return { 'ok': False, 'reason': 'disabled' }
     else:
         return { 'ok': False, 'reason': 'failed' }
+
+@jsonrpc_method('RPC.Account.logout')
+def rpc_Account_logout(request):
+    """ """
+    logout(request)
 
