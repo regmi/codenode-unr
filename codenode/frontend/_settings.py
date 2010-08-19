@@ -88,6 +88,8 @@ APP_PORT = 8000
 ENV_PATH = os.path.join(os.path.abspath('.'), 'data') #XXX
 PLOT_IMAGES = os.path.join(ENV_PATH, 'plot_images')
 
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
 TEMPLATE_DIRS = (
     os.path.join(PROJECT_PATH, 'templates')
 )

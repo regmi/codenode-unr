@@ -55,12 +55,14 @@ def rpc_Account_isAuthenticated(request):
     return { 'auth': request.user.is_authenticated() }
 
 @jsonrpc_method('RPC.Account.login')
-def rpc_Account_login(request, username, password):
+def rpc_Account_login(request, username, password, remember):
     """Login to the system. """
     user = authenticate(username=username, password=password)
 
     if user is not None:
         if user.is_active:
+            if not remember:
+                request.session.set_expiry(0)
             login(request, user)
             return { 'ok': True }
         else:
