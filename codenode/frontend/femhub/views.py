@@ -1,6 +1,7 @@
 
 from django.shortcuts import render_to_response
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
 
 from codenode.external.jsonrpc import jsonrpc_method
 
@@ -55,7 +56,7 @@ def rpc_Account_isAuthenticated(request):
 
 @jsonrpc_method('RPC.Account.login')
 def rpc_Account_login(request, username, password):
-    """ """
+    """Login to the system. """
     user = authenticate(username=username, password=password)
 
     if user is not None:
@@ -69,6 +70,49 @@ def rpc_Account_login(request, username, password):
 
 @jsonrpc_method('RPC.Account.logout')
 def rpc_Account_logout(request):
-    """ """
+    """Logout from the system. """
     logout(request)
+
+@jsonrpc_method('RPC.Account.createAccount')
+def rpc_Account_createAccount(request, username, email, password):
+    """Create new user account ."""
+    try:
+        User.objects.get(username=username)
+        return { 'ok': False, 'reason': 'exists' }
+    except User.DoesNotExist:
+        pass
+
+    User.objects.create_user(username, email, password)
+    return { 'ok': True }
+
+@jsonrpc_method('RPC.Account.remindPassword')
+def rpc_Account_remindPassword(request, username):
+    """Create new random password and send it to the user. """
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return { 'ok': False, 'reason': 'does-not-exist' }
+
+    password = User.objects.make_random_password()
+
+    user.set_password(password)
+    user.save()
+
+    head = "[FEMhub Online Lab] Password Reminder Notification"
+    body = """\
+Dear %(username)s,
+
+we received reqest to replace your old password with new,
+auto-generated one. Your new password is:
+
+%(password)s
+
+The above password was E-mailed to you in clear text, so it
+is suggested that you change it after first login with new
+password.
+""" % {'username': username, 'password': password}
+
+    user.email_user(head, body)
+
+    return { 'ok': True }
 
