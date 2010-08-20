@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from codenode.external.jsonrpc import jsonrpc_method
 
 from codenode.frontend.bookshelf.models import Folder
+from codenode.frontend.notebook.models import Notebook
 
 import codenode.frontend.bookshelf.models as _bookshelf
 import codenode.frontend.notebook.models as _notebook
@@ -28,23 +29,6 @@ def rpc_hello(request):
 def rpc_getEngines(request):
     engines = _backend.EngineType.objects.all()
     return [ { 'id': engine.id, 'name': engine.name } for engine in engines ]
-
-@jsonrpc_auth_method('RPC.getNotebooks')
-def rpc_getNotebooks(request):
-    pass
-
-@jsonrpc_auth_method('RPC.newNotebook')
-def rpc_newNotebook(request, engine_id):
-    notebook = _notebook.Notebook(owner=request.user)
-    notebook.save()
-
-    engine = _backend.EngineType.objects.get(id=engine_id)
-    access = allocateEngine(engine.backend.address, engine.name)
-
-    backend = _backend.NotebookBackendRecord(notebook=notebook, engine_type=engine, access_id=access)
-    backend.save()
-
-    return { 'id': notebook.guid }
 
 @jsonrpc_method('RPC.Account.isAuthenticated')
 def rpc_Account_isAuthenticated(request):
@@ -162,7 +146,7 @@ def rpc_Folders_getFolders(request, guid):
 def rpc_Folders_renameFolder(request, guid, title):
     """Set new title to the given folder. """
     try:
-        folder = Folder.objects.get(guid=guid)
+        folder = Folder.objects.get(owner=request.user, guid=guid)
     except Folder.DoesNotExist:
         return { 'ok': False, 'reason': 'does-not-exist' }
 
@@ -175,11 +159,89 @@ def rpc_Folders_renameFolder(request, guid, title):
 def rpc_Folders_deleteFolder(request, guid):
     """Delete the given folder. """
     try:
-        folder = Folder.objects.get(guid=guid)
+        folder = Folder.objects.get(owner=request.user, guid=guid)
     except Folder.DoesNotExist:
         return { 'ok': False, 'reason': 'does-not-exist' }
 
     folder.delete()
+
+    return { 'ok': True }
+
+@jsonrpc_auth_method('RPC.Folders.moveFolder')
+def rpc_Folders_moveFolder(request, parent_guid, folder_guid):
+    """Move the given folder to a new location. """
+    try:
+        parent = Folder.objects.get(owner=request.user, guid=parent_guid)
+    except Folder.DoesNotExist:
+        return { 'ok': False, 'reason': 'does-not-exist' }
+
+    try:
+        folder = Folder.objects.get(owner=request.user, guid=folder_guid)
+    except Folder.DoesNotExist:
+        return { 'ok': False, 'reason': 'does-not-exist' }
+
+    folder.parent = parent
+    folder.save()
+
+    return { 'ok': True }
+
+@jsonrpc_auth_method('RPC.Notebooks.addNotebook')
+def rpc_Notebooks_addNotebook(request, engine_guid, folder_guid, title='untitled'):
+    """Add new notebook with the given title to the folder. """
+    try:
+        folder = Folder.objects.get(owner=request.user, guid=folder_guid)
+    except Folder.DoesNotExist:
+        return { 'ok': False, 'reason': 'does-not-exist' }
+
+    notebook = Notebook(owner=request.user, folder=folder, title=title)
+    notebook.save()
+
+    ### XXX: this has to be improved
+    engine = _backend.EngineType.objects.get(id=engine_guid)
+    access = allocateEngine(engine.backend.address, engine.name)
+
+    backend = _backend.NotebookBackendRecord(notebook=notebook, engine_type=engine, access_id=access)
+    backend.save()
+    ################################
+
+    return { 'ok': True, 'guid': notebook.guid }
+
+@jsonrpc_auth_method('RPC.Notebooks.getNotebooks')
+def rpc_Notebooks_getNotebooks(request, guid):
+    """Get all notebooks from the given location. """
+    try:
+        folder = Folder.objects.get(owner=request.user, guid=guid)
+    except Folder.DoesNotExist:
+        return { 'ok': False, 'reason': 'does-not-exist' }
+
+    notebooks = []
+
+    for notebook in Notebook.objects.filter(owner=request.user, folder=folder):
+        notebooks.append({
+            'guid': notebook.guid,
+            'title': notebook.title,
+            'engine': notebook.backend.all()[0].engine_type.name,
+            'datetime': notebook.last_modified_time().strftime("%Y-%m-%d %H:%M:%S"),
+        })
+
+    return { 'ok': True, 'notebooks': notebooks }
+
+@jsonrpc_auth_method('RPC.Notebooks.moveNotebooks')
+def rpc_Notebooks_moveNotebooks(request, folder_guid, notebooks_guid):
+    """Move the given notebooks to a new location. """
+    try:
+        folder = Folder.objects.get(owner=request.user, guid=folder_guid)
+    except Folder.DoesNotExist:
+        return { 'ok': False, 'reason': 'does-not-exist' }
+
+    for notebook_guid in notebooks_guid:
+        try:
+            notebook = Notebook.objects.get(owner=request.user, guid=notebook_guid)
+        except Folder.DoesNotExist:
+            return { 'ok': False, 'reason': 'does-not-exist' }
+
+        notebook.folder = folder
+        notebook.save()
 
     return { 'ok': True }
 

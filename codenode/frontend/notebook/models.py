@@ -19,8 +19,8 @@ class Notebook(models.Model):
     collaborators = models.ManyToManyField(User, blank=True, related_name='notebook_collaborator')
     viewers = models.ManyToManyField(User, blank=True, related_name='notebook_viewer')
     title = models.CharField(max_length=100, default='untitled')
-    # The location should be handled by a bookshelf model
-    location = models.CharField(max_length=100, default='root')
+    location = models.CharField(max_length=100, default='root') # XXX: remove this
+    folder = models.ForeignKey('bookshelf.Folder')
     created_time = models.DateTimeField(auto_now_add=True)
     orderlist = models.TextField(editable=False, default='orderlist')
 
