@@ -206,6 +206,31 @@ def rpc_Notebooks_addNotebook(request, engine_guid, folder_guid, title='untitled
 
     return { 'ok': True, 'guid': notebook.guid }
 
+@jsonrpc_auth_method('RPC.Notebooks.renameNotebook')
+def rpc_Notebooks_renameNotebook(request, guid, title):
+    """Set new title to the given notebook. """
+    try:
+        notebook = Notebook.objects.get(owner=request.user, guid=guid)
+    except Notebooks.DoesNotExist:
+        return { 'ok': False, 'reason': 'does-not-exist' }
+
+    notebook.title = title
+    notebook.save()
+
+    return { 'ok': True }
+
+@jsonrpc_auth_method('RPC.Notebooks.deleteNotebook')
+def rpc_Notebooks_deleteNotebook(request, guid):
+    """Delete the given notebook. """
+    try:
+        notebook = Notebook.objects.get(owner=request.user, guid=guid)
+    except Notebooks.DoesNotExist:
+        return { 'ok': False, 'reason': 'does-not-exist' }
+
+    notebook.delete()
+
+    return { 'ok': True }
+
 @jsonrpc_auth_method('RPC.Notebooks.getNotebooks')
 def rpc_Notebooks_getNotebooks(request, guid):
     """Get all notebooks from the given location. """
