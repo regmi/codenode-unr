@@ -5,6 +5,8 @@ from django.contrib.auth.models import User
 
 from codenode.external.jsonrpc import jsonrpc_method
 
+from codenode.frontend.bookshelf.models import Folder
+
 import codenode.frontend.bookshelf.models as _bookshelf
 import codenode.frontend.notebook.models as _notebook
 import codenode.frontend.backend.models as _backend
@@ -26,11 +28,6 @@ def rpc_hello(request):
 def rpc_getEngines(request):
     engines = _backend.EngineType.objects.all()
     return [ { 'id': engine.id, 'name': engine.name } for engine in engines ]
-
-@jsonrpc_auth_method('RPC.getFolders')
-def rpc_getFolders(request):
-    folders = _bookshelf.Folder.objects.filter(owner=request.user)
-    return [ { 'guid': folder.guid, 'title': folder.title } for folder in folders ]
 
 @jsonrpc_auth_method('RPC.getNotebooks')
 def rpc_getNotebooks(request):
@@ -115,6 +112,74 @@ password.
 """ % {'username': username, 'password': password}
 
     user.email_user(head, body)
+
+    return { 'ok': True }
+
+@jsonrpc_auth_method('RPC.Folders.addRoot')
+def rpc_Folders_addRoot(request, title):
+    """Add new root folder. """
+    folder = Folder(owner=request.user, title=title)
+    folder.save()
+    return { 'ok': True, 'guid': folder.guid }
+
+@jsonrpc_auth_method('RPC.Folders.getRoot')
+def rpc_Folders_getRoot(request):
+    """Get root folder. """
+    try:
+        folder = Folder.objects.get(owner=request.user, parent__isnull=True)
+    except Folder.DoesNotExist:
+        folder = Folder(owner=request.user, title="My folders")
+        folder.save()
+
+    return { 'ok': True, 'guid': folder.guid, 'title': folder.title }
+
+@jsonrpc_auth_method('RPC.Folders.addFolder')
+def rpc_Folders_addFolder(request, guid, title):
+    """Add new folder with the given title to the parent. """
+    try:
+        parent = Folder.objects.get(guid=guid)
+    except Folder.DoesNotExist:
+        return { 'ok': False, 'reason': 'does-not-exist' }
+
+    folder = Folder(owner=request.user, parent=parent, title=title)
+    folder.save()
+
+    return { 'ok': True, 'guid': folder.guid }
+
+@jsonrpc_auth_method('RPC.Folders.getFolders')
+def rpc_Folders_getFolders(request, guid):
+    """Get a list of folders for the given parent's guid. """
+    try:
+        parent = Folder.objects.get(guid=guid)
+    except Folder.DoesNotExist:
+        return { 'ok': False, 'reason': 'does-not-exist' }
+
+    folders = Folder.objects.filter(owner=request.user, parent=parent)
+
+    return [ { 'ok': True, 'guid': folder.guid, 'title': folder.title } for folder in folders ]
+
+@jsonrpc_auth_method('RPC.Folders.renameFolder')
+def rpc_Folders_renameFolder(request, guid, title):
+    """Set new title to the given folder. """
+    try:
+        folder = Folder.objects.get(guid=guid)
+    except Folder.DoesNotExist:
+        return { 'ok': False, 'reason': 'does-not-exist' }
+
+    folder.title = title
+    folder.save()
+
+    return { 'ok': True }
+
+@jsonrpc_auth_method('RPC.Folders.deleteFolder')
+def rpc_Folders_deleteFolder(request, guid):
+    """Delete the given folder. """
+    try:
+        folder = Folder.objects.get(guid=guid)
+    except Folder.DoesNotExist:
+        return { 'ok': False, 'reason': 'does-not-exist' }
+
+    folder.delete()
 
     return { 'ok': True }
 
