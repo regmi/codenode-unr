@@ -1,11 +1,12 @@
-######################################################################### 
-# Copyright (C) 2007, 2008, 2009 
+#########################################################################
+# Copyright (C) 2007, 2008, 2009
 # Alex Clemesha <alex@clemesha.org> & Dorian Raymer <deldotdr@gmail.com>
-# 
-# This module is part of codenode, and is distributed under the terms 
+#
+# This module is part of codenode, and is distributed under the terms
 # of the BSD License:  http://www.opensource.org/licenses/bsd-license.php
 #########################################################################
 
+'''
 import os
 from whoosh import index
 from whoosh import analysis
@@ -21,9 +22,9 @@ from codenode.frontend.notebook.models import Notebook, Cell
 
 SEARCH_INDEX = settings.SEARCH_INDEX
 SEARCH_SCHEMA = Schema(
-    nbid=KEYWORD(stored=True), 
-    owner=KEYWORD(stored=True), 
-    title=TEXT(field_boost=3), 
+    nbid=KEYWORD(stored=True),
+    owner=KEYWORD(stored=True),
+    title=TEXT(field_boost=3),
     content=TEXT(analyzer=analysis.FancyAnalyzer())
 )
 
@@ -66,3 +67,5 @@ def delete(**kwargs):
     ix.commit()
 #Django signal registration
 signals.post_delete.connect(delete, sender=Notebook)
+'''
+

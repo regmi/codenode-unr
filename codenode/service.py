@@ -1,8 +1,8 @@
-######################################################################### 
-# Copyright (C) 2007, 2008, 2009 
+#########################################################################
+# Copyright (C) 2007, 2008, 2009
 # Alex Clemesha <alex@clemesha.org> & Dorian Raymer <deldotdr@gmail.com>
-# 
-# This module is part of codenode, and is distributed under the terms 
+#
+# This module is part of codenode, and is distributed under the terms
 # of the BSD License:  http://www.opensource.org/licenses/bsd-license.php
 #########################################################################
 """
@@ -45,7 +45,7 @@ class DesktopOptions(usage.Options):
             ['host', 'h', settings.APP_HOST, 'Host address to listen on'],
             ['port', 'p', settings.APP_PORT, 'Port number to listen on'],
             ['env_path', 'e', os.path.abspath('.'), 'Path to Codenode project dir'],
-            ['server_log', None, os.path.join(os.path.abspath('.'), 'server.log'), 
+            ['server_log', None, os.path.join(os.path.abspath('.'), 'server.log'),
                 'log file for codenoded server'],
             ['static_files', None, os.path.join(lib_path, 'frontend', 'static'),
                 'Path to static web application files'],
@@ -77,7 +77,7 @@ class FrontendOptions(usage.Options):
             ['url_root', 'u', '/', 'Root url path for web server'],
             ['url_static_root', 's', '/', 'Static root url path for web server'],
             ['env_path', 'e', os.path.abspath('.'), 'Path to Codenode project dir'],
-            ['server_log', None, os.path.join(os.path.abspath('.'), 'data', 'server.log'), 
+            ['server_log', None, os.path.join(os.path.abspath('.'), 'data', 'server.log'),
                 'log file for codenoded server'],
             ['static_files', None, os.path.join(os.path.abspath('.'), 'frontend', 'static'),
                 'Path to static web application files'],
@@ -134,7 +134,7 @@ def webResourceFactory(staticfiles, datafiles):
     resource_root.putChild("asyncnotebook", backend.EngineBusAdapter(backend_bus))
     resource_root.putChild("static", static_resource)
     resource_root.putChild("data", data_resource)
-    
+
     return resource_root
 
 class BackendSupervisor(procmon.ProcessMonitor):
@@ -164,15 +164,15 @@ class DesktopServiceMaker(object):
     def makeService(self, options):
         """
         Return a service collection of two services.
-        The web resource tree contains the wsgi interface to django and 
+        The web resource tree contains the wsgi interface to django and
         the async notebook web resources.
 
-        The process manager service will start the kernel server. 
-        The kernel server process is another twistd plugin, and needs a 
-        few options passed to it.  
+        The process manager service will start the kernel server.
+        The kernel server process is another twistd plugin, and needs a
+        few options passed to it.
         """
-        from codenode.frontend.search import search
-        search.create_index()
+        #from codenode.frontend.search import search
+        #search.create_index()
 
         desktop_service = service.MultiService()
 
@@ -220,8 +220,8 @@ class FrontendServiceMaker(object):
         This service is like the desktop, but is not responsible for
         controlling the kernel server process.
         """
-        from codenode.frontend.search import search
-        search.create_index()
+        #from codenode.frontend.search import search
+        #search.create_index()
 
         web_app_service = service.MultiService()
 
@@ -237,8 +237,8 @@ class FrontendServiceMaker(object):
         serverlog = options['server_log']
         web_resource_factory = server.Site(web_resource, logPath=serverlog)
 
-        frontend_server = internet.TCPServer(options['port'], 
-                                    web_resource_factory, 
+        frontend_server = internet.TCPServer(options['port'],
+                                    web_resource_factory,
                                     interface=options['host'])
         frontend_server.setServiceParent(web_app_service)
 
