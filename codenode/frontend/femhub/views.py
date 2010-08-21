@@ -2,6 +2,7 @@
 from django.shortcuts import render_to_response
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from django.conf import settings
 
 from codenode.external.jsonrpc import jsonrpc_method
 
@@ -19,7 +20,13 @@ def jsonrpc_auth_method(method, safe=False, validate=False):
     return jsonrpc_method(method, authenticated=True, safe=safe, validate=validate)
 
 def femhub(request):
-    return render_to_response('femhub/femhub.html')
+    """Render the main page of Online Lab. """
+    if settings.DEBUG:
+        debug = '-debug'
+    else:
+        debug = ''
+
+    return render_to_response('femhub/femhub.html', {'debug': debug})
 
 @jsonrpc_auth_method('RPC.hello')
 def rpc_hello(request):
