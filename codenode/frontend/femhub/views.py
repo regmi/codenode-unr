@@ -7,7 +7,7 @@ from django.conf import settings
 from codenode.external.jsonrpc import jsonrpc_method
 
 from codenode.frontend.bookshelf.models import Folder
-from codenode.frontend.notebook.models import Notebook
+from codenode.frontend.notebook.models import Notebook, Cell
 
 import codenode.frontend.bookshelf.models as _bookshelf
 import codenode.frontend.notebook.models as _notebook
@@ -274,6 +274,43 @@ def rpc_Notebooks_moveNotebooks(request, folder_guid, notebooks_guid):
 
         notebook.folder = folder
         notebook.save()
+
+    return { 'ok': True }
+
+@jsonrpc_auth_method('RPC.Notebooks.saveNotebook')
+def rpc_Notebooks_saveNotebook(request, guid, cellsdata, orderlist):
+    """Save the given notebook. """
+    try:
+        notebook = Notebook.objects.get(owner=request.user, guid=guid)
+    except Folder.DoesNotExist:
+        return { 'ok': False, 'reason': 'does-not-exist' }
+
+    for cellid, data in cellsdata.items():
+        cells = Cell.objects.filter(guid=cellid, notebook=notebook)
+
+        content = data["content"]
+        style = data["cellstyle"]
+        props = data["props"]
+
+        if len(cells) > 0:
+            cell = cells[0]
+            cell.content = content
+            cell.type = u"text"
+            cell.style = style
+            cell.props = props
+            cell.save()
+        else:
+            cell = Cell(guid=cellid,
+                        notebook=notebook,
+                        owner=notebook.owner,
+                        content=content,
+                        type=u"text",
+                        style=style,
+                        props=props)
+            notebook.cell_set.add(cell)
+
+    notebook.orderlist = orderlist
+    notebook.save()
 
     return { 'ok': True }
 
