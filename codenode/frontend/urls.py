@@ -14,17 +14,11 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns("",
-    (r'^$', 'django.views.generic.simple.redirect_to', {'url':'bookshelf'}), #uses template/homepage.html
+    (r'^$', 'django.views.generic.simple.redirect_to', {'url': 'femhub'}),
     (r'^femhub/', include('codenode.frontend.femhub.urls')),
-    (r'^bookshelf/', include('codenode.frontend.bookshelf.urls')),
-    (r'^notebook/', include('codenode.frontend.notebook.urls')),
-    (r'^backend/', include('codenode.frontend.backend.urls')),
-    (r'^accounts/', include('codenode.frontend.registration.urls')),
-    (r'^settings/', include('codenode.frontend.usersettings.urls')),
-    (r'^util/', include('codenode.frontend.util.urls')),
-    (r'^search$', include('codenode.frontend.search.urls')),
-    (r'^admin/doc/', include('django.contrib.admindocs.urls')),
     (r'^admin/(.*)', admin.site.root),
+    # XXX: 'notebook is a part of the old API, will be removed soon
+    (r'^notebook/', include('codenode.frontend.notebook.urls')),
 )
 
 if settings.DEBUG:
