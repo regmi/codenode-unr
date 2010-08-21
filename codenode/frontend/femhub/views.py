@@ -28,9 +28,9 @@ def femhub(request):
 
     return render_to_response('femhub/femhub.html', {'debug': debug})
 
-@jsonrpc_auth_method('RPC.hello')
+@jsonrpc_method('RPC.hello')
 def rpc_hello(request):
-    return "Hello, %s!" % request.user.username
+    return "Hello from FEMhub Online Lab"
 
 @jsonrpc_auth_method('RPC.getEngines')
 def rpc_getEngines(request):
