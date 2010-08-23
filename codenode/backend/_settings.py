@@ -9,7 +9,7 @@ PROJECT_PATH = os.path.abspath(os.path.dirname(__file__))
 
 #Interface and port to listen on
 HOST = 'localhost'
-PORT = 8337
+PORT = 9337
 
 #ENGINES_PATH = os.path.join(os.path.abspath('.'), 'data')
 

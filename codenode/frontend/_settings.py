@@ -81,7 +81,7 @@ AUTH_PROFILE_MODULE = "usersettings.UserSettings"
 SEARCH_INDEX = PROJECT_PATH+'/../data/search_index'
 
 APP_HOST = 'localhost'
-APP_PORT = 8000
+APP_PORT = 9000
 
 #Available types of notebooks: #XXX Clean up and do intelligent detection:
 
