@@ -1,6 +1,7 @@
 
 from django.shortcuts import render_to_response
 from django.contrib.auth import authenticate, login, logout
+from django.template import loader, Context, TemplateDoesNotExist
 from django.contrib.auth.models import User
 from django.conf import settings
 
@@ -32,6 +33,18 @@ def femhub(request):
 @jsonrpc_method('RPC.hello')
 def rpc_hello(request):
     return "Hello from FEMhub Online Lab"
+
+@jsonrpc_auth_method('RPC.Template.render')
+def rpc_Template_render(request, template, context=None):
+    """Render a template given the arguments. """
+    try:
+        template = loader.get_template(template)
+    except TemplateDoesNotExist:
+        return { 'ok': False, 'reason': 'does-not-exist' }
+
+    rendered = template.render(Context(context or {}))
+
+    return { 'ok': True, 'rendered': rendered }
 
 @jsonrpc_auth_method('RPC.Backend.getEngines')
 def rpc_Backend_getEngines(request):
