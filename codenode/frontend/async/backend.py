@@ -1,8 +1,8 @@
-######################################################################### 
-# Copyright (C) 2007, 2008, 2009 
+#########################################################################
+# Copyright (C) 2007, 2008, 2009
 # Alex Clemesha <alex@clemesha.org> & Dorian Raymer <deldotdr@gmail.com>
-# 
-# This module is part of codenode, and is distributed under the terms 
+#
+# This module is part of codenode, and is distributed under the terms
 # of the BSD License:  http://www.opensource.org/licenses/bsd-license.php
 #########################################################################
 import os
@@ -10,7 +10,7 @@ import uuid
 import pickle
 #from StringIO import StringIO
 
-from zope.interface import implements 
+from zope.interface import implements
 
 from twisted.internet import defer
 from twisted.web import xmlrpc
@@ -138,12 +138,20 @@ class BackendBus(object):
         """
         """
         nb = notebook_models.Notebook.objects.get(guid=notebook_id)
-        access_id = nb.backend.all()[0].access_id
-        backend_name = nb.backend.all()[0].engine_type.backend.name
+
+        mapping = nb.backend.all()
+
+        if len(mapping):
+            record = mapping[0]
+        else:
+            return
+
+        access_id = record.access_id
+        backend_name = record.engine_type.backend.name
         try:
             backend = self.backends[backend_name]
         except KeyError:
-            backend_address = nb.backend.all()[0].engine_type.backend.address
+            backend_address = record.engine_type.backend.address
             backend = self.addBackend(backend_name, backend_address)
         # check key d n e
         self.notebook_map[notebook_id] = (backend, access_id,)
@@ -154,9 +162,15 @@ class BackendBus(object):
         """
         """
         try:
-            backend, access_id = self.notebook_map[notebook_id]
+            result = self.notebook_map[notebook_id]
         except KeyError:
-            backend, access_id = self.addNotebook(notebook_id)
+            result = self.addNotebook(notebook_id)
+
+            if result is None:
+                return
+
+        backend, access_id = result
+
         log.msg('notebooks backend: %s' % backend)
         result = yield backend.send(access_id, msg)
         status = result['status']
