@@ -90,16 +90,14 @@ def frontend_command(daemonize=False, env_path='.', devel=False):
     server_log = os.path.join(abspath, 'data', 'server.log')
     static_files = os.path.join(abspath, 'frontend', 'static')
     pidfile = os.path.join(os.path.abspath("."), 'frontend.pid')
-    logfile = os.path.join(os.path.abspath("."), 'frontend.log')
     cmd = "twistd "
     if not daemonize:
         cmd += "-n "
+    cmd += "--pidfile=%s " % pidfile
     cmd += "codenode-frontend "
     cmd += "--env_path=%s " % abspath
     cmd += "--server_log=%s " % server_log
     cmd += "--static_files=%s " % static_files
-    cmd += "--pidfile=%s " % pidfile
-    cmd += "--logfile=%s " % logfile
     os.system(cmd)
 
 def backend_command(daemonize=False):
@@ -109,14 +107,12 @@ def backend_command(daemonize=False):
     #os.environ['DJANGO_SETTINGS_MODULE'] = 'frontend.settings'
     abspath = os.path.abspath(".")
     pidfile = os.path.join(abspath, 'backend.pid')
-    logfile = os.path.join(abspath, 'backend.log')
     cmd = "twistd "
     if not daemonize:
         cmd += "-n "
+    cmd += "--pidfile=%s " % pidfile
     cmd += "codenode-backend "
     cmd += "--env_path=%s " % abspath
-    cmd += "--pidfile=%s " % pidfile
-    cmd += "--logfile=%s " % logfile
     os.system(cmd)
 
 def syncdb_command():
