@@ -259,10 +259,17 @@ def rpc_Notebooks_getNotebooks(request, guid):
     notebooks = []
 
     for notebook in Notebook.objects.filter(owner=request.user, folder=folder):
+        mapping = notebook.backend.all()
+
+        if len(mapping):
+            engine_name = mapping[0].engine_type.name
+        else:
+            engine_name = u'(undefined)'
+
         notebooks.append({
             'guid': notebook.guid,
             'title': notebook.title,
-            'engine': notebook.backend.all()[0].engine_type.name,
+            'engine': engine_name,
             'datetime': notebook.last_modified_time().strftime("%Y-%m-%d %H:%M:%S"),
         })
 
