@@ -8,6 +8,7 @@ from codenode.external.jsonrpc import jsonrpc_method
 
 from codenode.frontend.bookshelf.models import Folder
 from codenode.frontend.notebook.models import Notebook, Cell
+from codenode.frontend.backend.models import EngineType
 
 import codenode.frontend.bookshelf.models as _bookshelf
 import codenode.frontend.notebook.models as _notebook
@@ -32,10 +33,19 @@ def femhub(request):
 def rpc_hello(request):
     return "Hello from FEMhub Online Lab"
 
-@jsonrpc_auth_method('RPC.getEngines')
-def rpc_getEngines(request):
-    engines = _backend.EngineType.objects.all()
-    return [ { 'id': engine.id, 'name': engine.name } for engine in engines ]
+@jsonrpc_auth_method('RPC.Backend.getEngines')
+def rpc_Backend_getEngines(request):
+    """Return a list of all available engines. """
+    engines = []
+
+    for engine in EngineType.objects.all():
+        engines.append({
+            'id': engine.id,
+            'name': engine.name,
+            'description': engine.description,
+        })
+
+    return { 'ok': True, 'engines': engines }
 
 @jsonrpc_method('RPC.Account.isAuthenticated')
 def rpc_Account_isAuthenticated(request):
