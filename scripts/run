@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if [ -e "run-backend" ]; then
+    ./run-backend
+else
+    bin/run-backend
+fi
+
+if [ -e "run-frontend" ]; then
+    ./run-frontend
+else
+    bin/run-frontend
+fi
+

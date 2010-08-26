@@ -1,0 +1,46 @@
+#!/bin/bash
+
+if [ -e "defs" ]; then
+    source defs
+else
+    source bin/defs
+fi
+
+if [ -n "$(ls -A $ROOT)" ]; then
+    echo "'$ROOT' is non-empty. Stop."
+    exit 1
+fi
+
+cd $ROOT
+
+mkdir -p frontend backend data twisted/plugins
+
+touch frontend/__init__.py
+touch backend/__init__.py
+
+cp $BASE/codenode-unr/codenode/frontend/_settings.py frontend/settings.py
+cp $BASE/codenode-unr/codenode/backend/_settings.py backend/settings.py
+
+ln -s $BASE/codenode-unr/codenode/frontend/static frontend/static
+ln -s $BASE/codenode-unr/codenode/frontend/templates frontend/templates
+
+ln -s $BASE/codenode-unr/codenode/twisted/plugins/*.py twisted/plugins
+
+if [ -e "/usr/bin/django-admin" ]; then
+    DJANGO=django-admin
+else
+    DJANGO=django-admin.py
+fi
+
+PYTHONPATH=$PYTHONPATH $DJANGO syncdb --settings=frontend.settings --pythonpath=.
+
+cd data
+
+SERVER_VAL='(1, "local", "http://localhost:9337")'
+ENGINE_VAL='(1, "Python", 1, "")'
+
+echo "insert into backend_backendserver values $SERVER_VAL;" | sqlite3 codenode.db
+echo "insert into backend_enginetype values $ENGINE_VAL;" | sqlite3 codenode.db
+
+echo "Done."
+

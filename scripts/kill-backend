@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if [ -e "defs" ]; then
+    source defs
+else
+    source bin/defs
+fi
+
+if [ -e "$ROOT/backend.pid" ]; then
+    echo "Stopping backend ..."
+    kill `cat $ROOT/backend.pid`
+    echo "Done."
+fi
+

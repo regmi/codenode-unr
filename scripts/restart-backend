@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [ -e "kill-backend" ]; then
+    ./kill-backend
+    ./run-backend
+else
+    bin/kill-backend
+    bin/run-backend
+fi
+

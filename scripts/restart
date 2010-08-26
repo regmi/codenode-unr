@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if [ -e "restart-backend" ]; then
+    ./restart-backend
+else
+    bin/restart-backend
+fi
+
+if [ -e "restart-frontend" ]; then
+    ./restart-frontend
+else
+    bin/restart-frontend
+fi
+

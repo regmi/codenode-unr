@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if [ -e "kill-backend" ]; then
+    ./kill-backend
+else
+    bin/kill-backend
+fi
+
+if [ -e "kill-frontend" ]; then
+    ./kill-frontend
+else
+    bin/kill-frontend
+fi
+

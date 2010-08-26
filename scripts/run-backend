@@ -1,0 +1,12 @@
+#!/bin/bash
+
+if [ -e "defs" ]; then
+    source defs
+else
+    source bin/defs
+fi
+
+cd $ROOT
+
+PYTHONPATH=$PYTHONPATH $PYTHONPATH/bin/codenode-admin backend $*
+

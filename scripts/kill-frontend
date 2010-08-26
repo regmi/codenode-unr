@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if [ -e "defs" ]; then
+    source defs
+else
+    source bin/defs
+fi
+
+if [ -e "$ROOT/frontend.pid" ]; then
+    echo "Stopping frontend ..."
+    kill `cat $ROOT/frontend.pid`
+    echo "Done."
+fi
+

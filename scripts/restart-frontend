@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [ -e "kill-frontend" ]; then
+    ./kill-frontend
+    ./run-frontend
+else
+    bin/kill-frontend
+    bin/run-frontend
+fi
+

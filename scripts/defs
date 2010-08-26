@@ -1,0 +1,8 @@
+#!/bin/bash
+
+BASE=/home/mateusz/online-lab/base
+ROOT=/home/lab/online-lab/root
+HOME=/home/lab/online-lab/home
+
+PYTHONPATH=$BASE/codenode-unr
+

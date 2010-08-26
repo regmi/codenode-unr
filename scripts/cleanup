@@ -1,0 +1,12 @@
+#!/bin/bash
+
+if [ -e "defs" ]; then
+    source defs
+else
+    source bin/defs
+fi
+
+rm -f $ROOT/*.log
+rm -f $ROOT/data/*.log
+rm -f $ROOT/twisted/plugins/dropin.cache
+

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [ -e "run-frontend" ]; then
+    ./run-frontend -daemonize
+else
+    bin/run-frontend -daemonize
+fi
+
