@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Link user interface in frontend/static, e.g.:
+# Link Online Lab UI in frontend/static, e.g.:
 #
-# $ bin/link-femhub <full-path-to-femhub-online-lab>
+# $ bin/link-online-lab-ui <path-to-femhub-online-lab-ui>
 #
 # (from the main directory, not bin/)
 
-BASE=$1
+BASE=$(readlink -f $1)
 
 ln -sf $BASE/js/femhub codenode/frontend/static/js/femhub
 ln -sf $BASE/css/femhub codenode/frontend/static/css/femhub
