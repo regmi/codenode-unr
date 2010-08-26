@@ -1,8 +1,8 @@
 #!/bin/bash
 
-BASE=/home/mateusz/online-lab/base
-ROOT=/home/lab/online-lab/root
-HOME=/home/lab/online-lab/home
+BASE=$(readlink -f ./base)
+ROOT=$(readlink -f ./root)
+HOME=$(readlink -f ./home)
 
 PYTHONPATH=$BASE/codenode-unr
 
