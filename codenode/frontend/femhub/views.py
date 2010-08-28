@@ -3,6 +3,7 @@ from django.shortcuts import render_to_response
 from django.contrib.auth import authenticate, login, logout
 from django.template import loader, Context, TemplateDoesNotExist
 from django.contrib.auth.models import User
+from django.utils import simplejson as json
 from django.conf import settings
 
 from codenode.external.jsonrpc import jsonrpc_method
@@ -343,4 +344,47 @@ def rpc_Notebooks_saveNotebook(request, guid, cellsdata, orderlist):
     notebook.save()
 
     return { 'ok': True }
+
+@jsonrpc_auth_method('RPC.Notebooks.getCells')
+def rpc_Notebooks_getCells(request, guid, type=None):
+    """Retrieve cells from the given notebook. """
+    try:
+        notebook = Notebook.objects.get(owner=request.user, guid=guid)
+    except Folder.DoesNotExist:
+        return { 'ok': False, 'reason': 'does-not-exist' }
+
+    if notebook.orderlist == 'orderlist':
+        return { 'ok': True }
+
+    def style_to_type(style):
+        if style == 'outputtext':
+            return 'output'
+
+        if style == 'outputimage':
+            return 'image'
+
+        if style == 'text':
+            return 'content'
+
+        return style
+
+    data, cells = {}, []
+
+    for cell in Cell.objects.filter(notebook=notebook):
+        ctype, guid = style_to_type(cell.style), cell.guid
+
+        if type is None or ctype == type:
+            data[guid] = {
+                'guid': guid,
+                'type': type,
+                'content': cell.content,
+            }
+
+    orderlist = json.loads(notebook.orderlist)
+
+    for guid in orderlist:
+        if guid in data:
+            cells.append(data[guid])
+
+    return { 'ok': True, 'cells': cells }
 
