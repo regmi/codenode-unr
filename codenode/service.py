@@ -137,25 +137,6 @@ def webResourceFactory(staticfiles, datafiles):
 
     return resource_root
 
-class BackendSupervisor(procmon.ProcessMonitor):
-    """Quick fix hack until better process supervisor is
-    implemented.
-    """
-
-    def startProcess(self, name):
-        return
-        if self.protocols.has_key(name):
-            return
-        p = self.protocols[name] = procmon.LoggingProtocol()
-        p.service = self
-        p.name = name
-        args, uid, gid = self.processes[name][:3]
-        _time = procmon.time.time()
-        self.timeStarted[name] = _time
-        reactor.spawnProcess(p, args[0], args, env=None, uid=uid, gid=gid)
-
-
-
 class DesktopServiceMaker(object):
 
     implements(service.IServiceMaker, service.IPlugin)
@@ -173,9 +154,6 @@ class DesktopServiceMaker(object):
         The kernel server process is another twistd plugin, and needs a
         few options passed to it.
         """
-        #from codenode.frontend.search import search
-        #search.create_index()
-
         desktop_service = service.MultiService()
 
         staticfiles = options['env_path'] + "/frontend/static" #XXX
@@ -192,21 +170,6 @@ class DesktopServiceMaker(object):
                                     interface='localhost')
         tcp_server.setServiceParent(desktop_service)
 
-        ################################################
-        # local backend server
-        #
-        twistd_bin = commands.getoutput('which twistd')
-        backend_args = [twistd_bin, '-n',
-                            '--pidfile', os.path.join(options['env_path'], 'backend.pid'),
-                            'codenode-backend',
-                            '--env_path', options['env_path']
-                        ]
-        backendSupervisor = BackendSupervisor()
-        backendSupervisor.addProcess('backend', backend_args)
-        backendSupervisor.setServiceParent(desktop_service)
-        #
-        ################################################
-
         return desktop_service
 
 
@@ -222,9 +185,6 @@ class FrontendServiceMaker(object):
         This service is like the desktop, but is not responsible for
         controlling the kernel server process.
         """
-        #from codenode.frontend.search import search
-        #search.create_index()
-
         web_app_service = service.MultiService()
 
         if options['devel_mode']:
