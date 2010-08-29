@@ -30,37 +30,6 @@ lib_path = codenode.__path__[0]
 from django.conf import settings
 VERSION = '0.2'
 
-
-
-class DesktopOptions(usage.Options):
-    """Main command line options for the desktop server.
-     - host name
-     - port number
-     - proxy configuration
-     - secure, use ssl
-
-    """
-
-    optParameters = [
-            ['host', 'h', settings.APP_HOST, 'Host address to listen on'],
-            ['port', 'p', settings.APP_PORT, 'Port number to listen on'],
-            ['env_path', 'e', os.path.abspath('.'), 'Path to Codenode project dir'],
-            ['server_log', None, os.path.join(os.path.abspath('.'), 'server.log'),
-                'log file for codenoded server'],
-            ['static_files', None, os.path.join(lib_path, 'frontend', 'static'),
-                'Path to static web application files'],
-        ]
-
-    optFlags = [
-            ['devel_mode', 'd', 'Development mode'],
-            ['open_browser', 'b', 'Automatically open web browser']
-        ]
-
-
-    def opt_version(self):
-        print 'codenode Desktop version: %s' % VERSION
-        sys.exit(0)
-
 class FrontendOptions(usage.Options):
     """Main command line options for the app server.
      - host name
@@ -92,9 +61,6 @@ class FrontendOptions(usage.Options):
     def opt_version(self):
         print 'codenode WebApp version: %s' % VERSION
         sys.exit(0)
-
-
-
 
 def webResourceFactory(staticfiles, datafiles):
     """This factory function creates an instance of the front end web
@@ -136,42 +102,6 @@ def webResourceFactory(staticfiles, datafiles):
     resource_root.putChild("data", data_resource)
 
     return resource_root
-
-class DesktopServiceMaker(object):
-
-    implements(service.IServiceMaker, service.IPlugin)
-    tapname = "codenode"
-    description = """A localhost only version for personal desktop-app-like usage."""
-    options = DesktopOptions
-
-    def makeService(self, options):
-        """
-        Return a service collection of two services.
-        The web resource tree contains the wsgi interface to django and
-        the async notebook web resources.
-
-        The process manager service will start the kernel server.
-        The kernel server process is another twistd plugin, and needs a
-        few options passed to it.
-        """
-        desktop_service = service.MultiService()
-
-        staticfiles = options['env_path'] + "/frontend/static" #XXX
-        datafiles = options['env_path'] + "/data/plot_images" #XXX
-        #Temporary hack
-        if not os.path.exists(datafiles):
-            os.mkdir(datafiles)
-        web_resource = webResourceFactory(staticfiles, datafiles)
-        serverlog = options['env_path'] + "/data/server.log" #XXX
-        web_resource_factory = server.Site(web_resource, logPath=serverlog)
-
-        tcp_server = internet.TCPServer(options['port'],
-                                    web_resource_factory,
-                                    interface='localhost')
-        tcp_server.setServiceParent(desktop_service)
-
-        return desktop_service
-
 
 class FrontendServiceMaker(object):
 
@@ -217,9 +147,4 @@ class FrontendServiceMaker(object):
             telnel_manhole = internet.TCPServer(6023, f)
             telnel_manhole.setServiceParent(web_app_service)
         return web_app_service
-
-
-
-
-
 
